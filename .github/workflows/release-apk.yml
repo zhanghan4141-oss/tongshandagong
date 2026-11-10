@@ -106,6 +106,8 @@ jobs:
           SIZE=$(stat -c%s "$APK")
           FALLBACK="https://github.com/${REPO}/releases/download/${TAG}/${APK}"
           export VERSION APK FALLBACK SIZE
+          # checkout 会把 tag 重写成指向 commit 的轻量 ref、丢失注释，这里重新拉取 annotated tag 取注释
+          git fetch origin "+refs/tags/${TAG}:refs/tags/${TAG}" 2>/dev/null || true
           NOTE="$(git tag -l --format='%(contents:subject)' "$TAG" 2>/dev/null | head -1)"
           if [ -z "$NOTE" ]; then NOTE="更新至 v${VERSION}"; fi
           export NOTE
