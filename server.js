@@ -930,7 +930,7 @@ function notifyHostOffline(socket, room){
   const host = room.seats[hs];
   if(!host || host.type!=='human' || !host.offline) return;
   const mins = Math.max(1, Math.round(HOST_OFFLINE_HANDOVER_MS/60000));
-  socket.emit('toast', `房主 ${host.name} 掉线，${mins} 分钟内未重连将移交房主`);
+  socket.emit('toast', { text: `房主 ${host.name} 掉线，${mins} 分钟内未重连将移交房主`, ms: OFFLINE_TOAST_MS });
 }
 // 场结束（自然场末/提前收场）后：若房主仍离线，重新起移交计时
 function armHostHandoverIfNeeded(room){

@@ -74,9 +74,20 @@ function toast(msg, ms){
   const app=document.getElementById('app');
   const inTable = !!(app && app.classList.contains('inTable'));
   if(inTable){ showTableToast(String(msg), ms); return; } // 牌桌内：浮动 toast
-  const el=$('status');
-  if(el) el.textContent=msg;
-  setTimeout(()=>{ if(el) el.textContent=''; }, ms || 4000);
+  pushToast($('status'), String(msg), ms || 4000); // 大厅：多条往上堆叠
+}
+// 通用：向容器追加一条 toast（不覆盖已有；新的在最下、旧的往上顶），到点自动移除，容器空则收起
+function pushToast(box, msg, ms){
+  if(!box) return;
+  const it=document.createElement('div');
+  it.className='toastItem';
+  it.textContent=String(msg);
+  box.appendChild(it);
+  const dur = Number(ms) || 3200;
+  setTimeout(()=>{
+    if(it.parentNode===box) box.removeChild(it);
+    if(box.classList && !box.querySelector('.toastItem')) box.classList.remove('show');
+  }, dur);
 }
 // 牌桌内浮动提示（供 net.js toast 与 ui-net flashMsg 共用）——#status 只能在大厅看见
 // 对局配置弹窗只读开关：一场未结束时除「保存」外全部禁用（对局中设置不可改）
@@ -88,14 +99,12 @@ function syncSetLock(){
   const h=$('setLockHint'); if(h) h.style.display=locked?'':'none';
 }
 // 牌桌内浮动提示（供 net.js toast 与 ui-net flashMsg 共用）——#status 只能在大厅看见。
-// 位置由 CSS 锚定在出牌排左侧（随旋转/窄屏自适应），这里只负责显隐。
+// 位置由 CSS 锚定在出牌排左侧（随旋转/窄屏自适应），这里只负责显隐；多条往上堆叠。
 function showTableToast(msg, ms){
   const t=document.getElementById('tableToast');
   if(!t) return;
-  t.textContent=String(msg);
   t.classList.add('show');
-  if(t._tt){ clearTimeout(t._tt); t._tt=null; }
-  t._tt=setTimeout(()=>{ t.classList.remove('show'); }, ms || 3200);
+  pushToast(t, String(msg), ms || 3200);
 }
 window.showTableToast = showTableToast;
 // HTML 转义：任何来自服务器/用户的名字、房间号在拼 innerHTML 前必须过这里（服务端已加 4 位白名单，双保险）
