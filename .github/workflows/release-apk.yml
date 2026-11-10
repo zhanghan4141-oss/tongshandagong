@@ -63,17 +63,25 @@ jobs:
           npm ci
           npx cap sync android
 
-      - name: 构建 Debug APK
+      - name: 解码 release keystore
+        env:
+          RELEASE_KEYSTORE_B64: ${{ secrets.RELEASE_KEYSTORE_B64 }}
+        run: |
+          echo "$RELEASE_KEYSTORE_B64" | base64 -d > android/release.keystore
+
+      - name: 构建 Release APK
+        env:
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleRelease --no-daemon
 
       - name: 命名 APK（版本名 + 入库 latest.apk）
         run: |
           mkdir -p release
-          cp android/app/build/outputs/apk/debug/app-debug.apk "${{ steps.ver.outputs.apk }}"
-          cp android/app/build/outputs/apk/debug/app-debug.apk release/latest.apk
+          cp android/app/build/outputs/apk/release/app-release.apk "${{ steps.ver.outputs.apk }}"
+          cp android/app/build/outputs/apk/release/app-release.apk release/latest.apk
 
       - name: 发布 GitHub Release
         uses: softprops/action-gh-release@v2

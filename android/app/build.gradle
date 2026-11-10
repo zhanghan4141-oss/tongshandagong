@@ -7,8 +7,8 @@ android {
         applicationId "xyz.zhangyuning.dagong"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 10
-        versionName "1.0.9"
+        versionCode 11
+        versionName "1.0.10"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,10 +16,25 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            def ks = rootProject.file('release.keystore')
+            if (ks.exists()) {
+                storeFile ks
+                storePassword (System.getenv('RELEASE_KEYSTORE_PASSWORD') ?: '')
+                keyAlias 'tongshandagong'
+                keyPassword (System.getenv('RELEASE_KEYSTORE_PASSWORD') ?: '')
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // 存在正式 keystore（CI 解码注入）时用它签名；否则退回 debug 签名（本地无密钥兜底）
+            signingConfig (rootProject.file('release.keystore').exists()
+                ? signingConfigs.release
+                : signingConfigs.debug)
         }
     }
 }

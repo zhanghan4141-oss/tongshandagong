@@ -156,7 +156,7 @@ function showUpdatePrompt(d){
     return b;
   }
   var ui = { ov:ov, prog:prog, progText:progText, barWrap:barWrap, barFill:barFill };
-  var btnLater = btn('稍后再说', false, function(){ ov.remove(); });
+  var btnLater = btn('稍后再说', false, function(){ ov.remove(); _updateShown = false; });
   var btnBackup = null;
   if(d.fallbackUrl && d.fallbackUrl !== d.apkUrl){
     btnBackup = btn('备用下载', false, function(){ downloadApk(d.fallbackUrl); });
@@ -250,6 +250,7 @@ function fallbackDownload(url, ui, msg){
   // 交给浏览器后关闭自定义弹窗
   setTimeout(function(){
     try{ if(ui && ui.ov && ui.ov.parentNode) ui.ov.parentNode.removeChild(ui.ov); }catch(e){}
+    _updateShown = false;
   }, 1500);
 }
 
