@@ -267,7 +267,25 @@ function downloadApk(url){
   }catch(e){}
   try{ window.open(abs, '_blank'); }catch(e){}
 }
+// 启动时清理缓存目录里残留的旧 APK（上次升级下载的，装完没删会累积）
+function cleanupOldApks(){
+  try{
+    var FS = plugins().Filesystem;
+    if(!FS || typeof FS.readdir !== 'function' || typeof FS.deleteFile !== 'function') return;
+    FS.readdir({ path: '', directory: 'CACHE' }).then(function(res){
+      var list = (res && res.files) || [];
+      list.forEach(function(f){
+        var name = typeof f === 'string' ? f : (f && f.name);
+        name = String(name || '');
+        if(/\.apk$/i.test(name)){
+          try{ FS.deleteFile({ path: name, directory: 'CACHE' }).catch(function(){}); }catch(e){}
+        }
+      });
+    }).catch(function(){});
+  }catch(e){}
+}
 function boot(){
+  cleanupOldApks();
   checkAppUpdate();
 }
 if(document.readyState === 'loading'){
