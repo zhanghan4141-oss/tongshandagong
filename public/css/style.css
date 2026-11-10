@@ -397,14 +397,14 @@ input,textarea{-webkit-user-select:text;user-select:text;}
 
 [hidden]{display:none!important;}
 /* ===== 大厅 ===== */
-#lobby{display:flex;min-height:100vh;align-items:flex-start;justify-content:center;padding-top:10vh;box-sizing:border-box;}
+#lobby{display:flex;min-height:100vh;align-items:flex-start;justify-content:center;padding-top:18vh;box-sizing:border-box;}
 .lobbyBox{position:relative;background:#173e2e;border:1px solid var(--gold);border-radius:16px;padding:26px 30px;max-width:460px;width:92%;}
 /* 大厅右上角：下载 App 安装包（仅在网页端出现） */
-.lobbyDownload{position:absolute;right:12px;top:12px;font-size:12px;padding:4px 10px;}
+.lobbyDownload{position:absolute;right:12px;top:12px;font-size:12px;padding:4px 10px;background:#b8860b;border-color:#d4a017;}
 @media (max-width:560px){ .lobbyDownload{right:8px;top:8px;font-size:11px;padding:3px 8px;} }
 /* App 内：检查更新按钮移到右下、灰调（网页端仍右上角「下载 App」）；toast 在其上一行不重叠 */
 html.isApp .lobbyDownload{position:static;display:block;width:max-content;margin:10px 0 0 auto;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.22);color:#b9d6c8;}
-.lobbyBox h1{color:var(--gold);font-size:22px;letter-spacing:2px;margin-bottom:6px;}
+.lobbyBox h1{color:var(--gold);font-size:30px;letter-spacing:2px;margin-bottom:6px;}
 .lobbySub{font-size:13px;color:#b9d6c8;margin-bottom:18px;}
 .lobbyRow{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;font-size:14px;}
 .lobbyRow label{color:#eef3ea;min-width:52px;}
@@ -467,7 +467,7 @@ html.isApp .lobbyDownload{position:static;display:block;width:max-content;margin
   .settingsBar select{font-size:11px;padding:1px 4px;}
   /* 大厅 */
   .lobbyBox{padding:18px;max-width:340px;}
-  .lobbyBox h1{font-size:18px;}
+  .lobbyBox h1{font-size:24px;}
   .lobbyRow{font-size:12px;}
   /* 角落信息 */
   .corner{min-width:90px;padding:4px 6px;font-size:10px;}
