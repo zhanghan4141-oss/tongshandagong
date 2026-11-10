@@ -1,0 +1,108 @@
+name: Release APK
+
+# 构建 Android APK（tag vX.Y.Z 触发）
+# 发版步骤：bump android/app/build.gradle 的 versionName/versionCode → commit+push → 打 tag vX.Y.Z 并 push。
+# CI 构建后：发布 Release 资产（兜底）→ 提交 release/latest.apk 入仓（主分发）→ 写 app-update/manifest.json（apkUrl=服务器路径，fallbackUrl=Release）→ 提交回 main。
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write   # 创建 Release + 上传资产 + 提交 manifest 回 main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 解析版本号
+        id: ver
+        shell: bash
+        run: |
+          TAG="${{ github.ref_name }}"
+          VERSION="${TAG#v}"
+          if [ -z "$VERSION" ] || [ "$VERSION" = "$TAG" ]; then
+            echo "::error::标签 ${TAG} 不是合法的 vX.Y.Z 形式"
+            exit 1
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "apk=tongshandagong-${VERSION}.apk" >> "$GITHUB_OUTPUT"
+
+      - name: 校验 build.gradle 版本一致
+        shell: bash
+        run: |
+          GV=$(grep -oP 'versionName\s+"\K[^"]+' android/app/build.gradle)
+          if [ "$GV" != "${{ steps.ver.outputs.version }}" ]; then
+            echo "::error::build.gradle versionName=${GV} 与标签版本 ${{ steps.ver.outputs.version }} 不一致，请先 bump 版本号"
+            exit 1
+          fi
+
+      - name: 安装 Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: 安装 JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: 安装 Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: 安装依赖并同步 Web 资源
+        run: |
+          npm ci
+          npx cap sync android
+
+      - name: 构建 Debug APK
+        run: |
+          cd android
+          ./gradlew assembleDebug --no-daemon
+
+      - name: 命名 APK（版本名 + 入库 latest.apk）
+        run: |
+          mkdir -p release
+          cp android/app/build/outputs/apk/debug/app-debug.apk "${{ steps.ver.outputs.apk }}"
+          cp android/app/build/outputs/apk/debug/app-debug.apk release/latest.apk
+
+      - name: 发布 GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "通山打拱 v${{ steps.ver.outputs.version }}"
+          body: "构建自 GitHub Actions（tag ${{ github.ref_name }}）"
+          files: ${{ steps.ver.outputs.apk }}
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 写 manifest 并提交回仓库
+        shell: bash
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+          APK: ${{ steps.ver.outputs.apk }}
+          TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -e
+          SIZE=$(stat -c%s "$APK")
+          FALLBACK="https://github.com/${REPO}/releases/download/${TAG}/${APK}"
+          export VERSION APK FALLBACK SIZE
+          export NOTE="更新至 v${VERSION}"
+          node -e 'const fs=require("fs");const m={version:process.env.VERSION,note:process.env.NOTE,apkUrl:"/app-update/"+process.env.APK,fallbackUrl:process.env.FALLBACK,apkSize:Number(process.env.SIZE),publishedAt:new Date().toISOString()};fs.writeFileSync("app-update/manifest.json",JSON.stringify(m,null,2)+"\n");'
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app-update/manifest.json release/latest.apk
+          if git diff --cached --quiet; then
+            echo "无变化，跳过提交"
+          else
+            git commit -m "chore(release): 发布 v${VERSION}（更新 manifest 与 release/latest.apk）"
+            git push origin HEAD:main || echo "::warning::推送 main 失败（可能受保护或并发提交），请手动同步"
+          fi
