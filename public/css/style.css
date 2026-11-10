@@ -402,6 +402,8 @@ input,textarea{-webkit-user-select:text;user-select:text;}
 /* 大厅右上角：下载 App 安装包（仅在网页端出现） */
 .lobbyDownload{position:absolute;right:12px;top:12px;font-size:12px;padding:4px 10px;}
 @media (max-width:560px){ .lobbyDownload{right:8px;top:8px;font-size:11px;padding:3px 8px;} }
+/* App 内：检查更新按钮移到底部居中（网页端仍保留右上角「下载 App」） */
+html.isApp .lobbyDownload{right:auto;top:auto;left:50%;bottom:14px;transform:translateX(-50%);}
 .lobbyBox h1{color:var(--gold);font-size:22px;letter-spacing:2px;margin-bottom:6px;}
 .lobbySub{font-size:13px;color:#b9d6c8;margin-bottom:18px;}
 .lobbyRow{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;font-size:14px;}

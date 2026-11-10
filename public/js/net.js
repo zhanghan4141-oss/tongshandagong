@@ -79,9 +79,14 @@ function toast(msg, ms){
 // 通用：向容器追加一条 toast（不覆盖已有；新的在最下、旧的往上顶），到点自动移除，容器空则收起
 function pushToast(box, msg, ms){
   if(!box) return;
+  const text=String(msg);
+  // 相同文案去重：已存在同文案 toast 时不再叠加（连点「检查更新」等重复提示只显示一条）
+  for(const el of box.querySelectorAll('.toastItem')){
+    if(el.textContent===text) return;
+  }
   const it=document.createElement('div');
   it.className='toastItem';
-  it.textContent=String(msg);
+  it.textContent=text;
   box.appendChild(it);
   const dur = Number(ms) || 3200;
   setTimeout(()=>{
@@ -519,6 +524,13 @@ function initDownloadApp(){
       });
     };
     b.hidden=false;
+    // 读取当前版本号，文案显示成「v1.0.10 · 检查更新」
+    try{
+      const A = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+      if(A && typeof A.getInfo==='function'){
+        A.getInfo().then(function(i){ if(i && i.version) b.textContent='v'+i.version+' · 检查更新'; }).catch(function(){});
+      }
+    }catch(e){}
     return;
   }
   fetch(apiUrl('/api/app/update'), { cache:'no-store' })
@@ -642,7 +654,7 @@ function bindLobby(){
   // 刷新按钮（牌桌内）：等同浏览器刷新页面（重新加载游戏）
   const rf=$('btnRefresh'); if(rf) rf.onclick=()=>{ location.reload(); };
   // 刷新列表按钮（大厅右上角）：重新拉取房间列表（非整页刷新）
-  const rl=$('btnRefreshList'); if(rl) rl.onclick=()=>{ if(socket) socket.emit('listRooms'); };
+  const rl=$('btnRefreshList'); if(rl) rl.onclick=()=>{ if(socket){ socket.emit('listRooms'); toast('已刷新房间列表'); } };
   // 设置变更 → 发服务器（开局前生效）
   ['setRounds','setKings','setJoker','setHalfFan','setFanCap','setTailBonus','setShowRemain','setShowCorner','setShowLog','setAIFill','setAIAuto'].forEach(id=>{
     const el=$(id);
