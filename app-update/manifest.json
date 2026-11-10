@@ -1,8 +1,8 @@
 {
-  "version": "1.0.13",
-  "note": "本次更新：大厅检查更新按钮移到右下角，不再遮挡提示；更新弹窗显示真实更新说明",
-  "apkUrl": "/app-update/tongshandagong-1.0.13.apk",
-  "fallbackUrl": "https://github.com/zhanghan4141-oss/tongshandagong/releases/download/v1.0.13/tongshandagong-1.0.13.apk",
-  "apkSize": 4976697,
-  "publishedAt": "2026-11-10T08:31:47.044Z"
+  "version": "1.0.14",
+  "note": "本次更新：App 启动时自动清理缓存里残留的旧安装包",
+  "apkUrl": "/app-update/tongshandagong-1.0.14.apk",
+  "fallbackUrl": "https://github.com/zhanghan4141-oss/tongshandagong/releases/download/v1.0.14/tongshandagong-1.0.14.apk",
+  "apkSize": 4976950,
+  "publishedAt": "2026-11-10T08:50:38.673Z"
 }
