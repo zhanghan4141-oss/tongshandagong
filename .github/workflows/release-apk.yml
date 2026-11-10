@@ -66,6 +66,7 @@ jobs:
       - name: 构建 Debug APK
         run: |
           cd android
+          chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
 
       - name: 命名 APK（版本名 + 入库 latest.apk）
