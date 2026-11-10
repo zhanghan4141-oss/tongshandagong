@@ -1,8 +1,8 @@
 {
-  "version": "1.0.15",
-  "note": "本次更新：大厅房间列表显示每个房间的玩家昵称与掉线状态",
-  "apkUrl": "/app-update/tongshandagong-1.0.15.apk",
-  "fallbackUrl": "https://github.com/zhanghan4141-oss/tongshandagong/releases/download/v1.0.15/tongshandagong-1.0.15.apk",
-  "apkSize": 4977400,
-  "publishedAt": "2026-11-10T10:24:54.297Z"
+  "version": "1.0.16",
+  "note": "本次更新：大厅标题放大、布局更居中、网页端下载按钮改金色",
+  "apkUrl": "/app-update/tongshandagong-1.0.16.apk",
+  "fallbackUrl": "https://github.com/zhanghan4141-oss/tongshandagong/releases/download/v1.0.16/tongshandagong-1.0.16.apk",
+  "apkSize": 4977404,
+  "publishedAt": "2026-11-10T11:26:30.837Z"
 }
