@@ -106,7 +106,9 @@ jobs:
           SIZE=$(stat -c%s "$APK")
           FALLBACK="https://github.com/${REPO}/releases/download/${TAG}/${APK}"
           export VERSION APK FALLBACK SIZE
-          export NOTE="更新至 v${VERSION}"
+          NOTE="$(git tag -l --format='%(contents:subject)' "$TAG" 2>/dev/null | head -1)"
+          if [ -z "$NOTE" ]; then NOTE="更新至 v${VERSION}"; fi
+          export NOTE
           node -e 'const fs=require("fs");const m={version:process.env.VERSION,note:process.env.NOTE,apkUrl:"/app-update/"+process.env.APK,fallbackUrl:process.env.FALLBACK,apkSize:Number(process.env.SIZE),publishedAt:new Date().toISOString()};fs.writeFileSync("app-update/manifest.json",JSON.stringify(m,null,2)+"\n");'
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
