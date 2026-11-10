@@ -1412,7 +1412,7 @@ function renderSeats(){
 }
 function renderCorner(){
   const c=$('corner'); if(!c) return;
-  // 只在「未开局 / 局末场末点过准备、牌桌已清空」时显示；不受 showCorner 开关控制
+  // 只在「未开局 / 局末场末点过准备、牌桌已清空」时显示
   const show = !G || (G && G.ended && boardCleared);
   c.style.display = show ? 'flex' : 'none';
   // #26 仅当设置内容变化时才重建 DOM（避免每次广播都刷信息框）

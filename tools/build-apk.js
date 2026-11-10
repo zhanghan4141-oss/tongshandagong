@@ -1,5 +1,5 @@
 /* =========================================================
- * 构建 Android 调试 APK，可指定服务器地址
+ * 构建 Android APK，可指定服务器地址
  *
  * 用法：
  *   node tools/build-apk.js                                  # 用默认线上地址
@@ -9,7 +9,9 @@
  * 做了什么：
  *   1. 把 --server 写入 public/js/env.js（构建后还原）
  *   2. http 地址时临时把 Capacitor 改成 http scheme + 允许明文（构建后还原）
- *   3. cap sync → gradlew assembleDebug
+ *   3. cap sync → gradlew assembleDebug / assembleRelease
+ *      —— 检测到 android/release.keystore 时构建 release 包（与 CI 一致，需 RELEASE_KEYSTORE_PASSWORD 环境变量），
+ *         否则退回 debug 包（本地无密钥兜底，仅用于内测）
  *   4. 把 APK 复制到 dist/
  *   5. 再 sync 一次，让 android/ 里的资源回到线上配置
  * ========================================================= */
@@ -22,7 +24,12 @@ const root = path.resolve(__dirname, '..');
 const envPath = path.join(root, 'public', 'js', 'env.js');
 const capPath = path.join(root, 'capacitor.config.json');
 const distDir = path.join(root, 'dist');
-const apkSrc = path.join(root, 'android', 'app', 'build', 'outputs', 'apk', 'debug', 'app-debug.apk');
+// 发布签名：与 CI 一致——检测到 android/release.keystore 时构建 release 包，否则退回 debug（本地无密钥兜底）
+const ksPath = path.join(root, 'android', 'release.keystore');
+const useRelease = fs.existsSync(ksPath);
+const apkSrc = useRelease
+  ? path.join(root, 'android', 'app', 'build', 'outputs', 'apk', 'release', 'app-release.apk')
+  : path.join(root, 'android', 'app', 'build', 'outputs', 'apk', 'debug', 'app-debug.apk');
 
 function argValue(name){
   const i = process.argv.indexOf(name);
@@ -120,9 +127,15 @@ try{
 }
 
 try{
+  if(useRelease && !process.env.RELEASE_KEYSTORE_PASSWORD){
+    console.error('[build-apk] 检测到 android/release.keystore，但未设置 RELEASE_KEYSTORE_PASSWORD 环境变量，无法签名 release 包。');
+    console.error('[build-apk] 请先设置（Windows PowerShell: $env:RELEASE_KEYSTORE_PASSWORD="<密码>"），或临时移走 release.keystore 退回 debug 包。');
+    process.exit(1);
+  }
   // Windows 下必须带 .\ ，否则 cmd 不会在当前目录查找
   const gradlew = process.platform === 'win32' ? '.\\gradlew.bat' : './gradlew';
-  run(gradlew + ' assembleDebug', path.join(root, 'android'));
+  const variant = useRelease ? 'assembleRelease' : 'assembleDebug';
+  run(gradlew + ' ' + variant, path.join(root, 'android'));
 
   fs.mkdirSync(distDir, { recursive: true });
   const host = target ? new URL(target).host.replace(/[^a-zA-Z0-9.-]/g, '_') : 'production';
@@ -132,7 +145,7 @@ try{
     const m = fs.readFileSync(path.join(root, 'android', 'app', 'build.gradle'), 'utf8').match(/versionName\s+"([^"]+)"/);
     if(m) version = m[1].replace(/[^a-zA-Z0-9._-]/g, '_');
   }catch(e){}
-  const out = path.join(distDir, 'tongshandagong-' + (version ? version + '-' : '') + host + '-debug.apk');
+  const out = path.join(distDir, 'tongshandagong-' + (version ? version + '-' : '') + host + (useRelease ? '-release.apk' : '-debug.apk'));
   fs.copyFileSync(apkSrc, out);
   console.log('\n[build-apk] 完成：' + out);
   if(target) console.log('[build-apk] 该包连接 ' + target);

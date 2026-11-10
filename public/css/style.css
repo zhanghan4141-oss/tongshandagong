@@ -10,7 +10,7 @@
  *   │                    徽标：.roundSco 局末分 / .cumSco 已打笼 / .kingBadge 4+王 / .calledMini 叫牌卡
  *   ├─ 出牌区 ............. .trick.trickN/S/W/E（对应 #t0..#t3），行内 .trickRow 叠放；.fanBadge 番数角标
  *   ├─ 桌面中央 ........... .center / #msg / #lastTrick / #trickScore
- *   ├─ 左上角 .corner ..... 叫牌+明鸡信息框（默认隐藏，renderCorner 开启）
+ *   ├─ 左上角 .corner ..... 牌局设置信息栏（未开局 / 局末场末清空后显示，renderCorner 控制，不受设置开关控制）
  *   ├─ 扑克牌 ............. .card（角标 .tl/.br、中央 .ctr、王 .jk、明鸡 .called/.calledMark/.calledOnDesk）
  *   ├─ 手牌区 ............. .south/.southMain/#hand/.hcard，出牌按钮排 .playBtns/.midBtns
  *   ├─ 日志 .............. .log（右上角，横屏时挪位）
@@ -803,16 +803,16 @@ body.landscapeCompat .tableTopRight .toolBtns .btn{font-size:12px;padding:4px 9p
 body.landscapeCompat .tableSideBtns{right:6px;bottom:6px;gap:4px;}
 body.landscapeCompat .tableSideBtn{font-size:12px;padding:4px 9px;}
 
-/* ===== 左上角牌局信息框关闭时：标题/房间号/我是谁 靠左，不留空位 ===== */
-.table:not(.cornerOn) .tableTitle{left:12px;}
-.table:not(.cornerOn) .tableWho{left:12px;}
+/* ===== 标题/房间号/我是谁 靠左：信息栏 .corner 固定在标题右侧（left:130px），标题始终靠左不留空位 ===== */
+.table .tableTitle{left:12px;}
+.table .tableWho{left:12px;}
 @media (max-width:560px){
-  .table:not(.cornerOn) .tableTitle{left:8px;}
-  .table:not(.cornerOn) .tableWho{left:8px;}
+  .table .tableTitle{left:8px;}
+  .table .tableWho{left:8px;}
 }
 @media (orientation:landscape) and (max-width:920px){
-  .table:not(.cornerOn) .tableTitle{left:6px;}
-  .table:not(.cornerOn) .tableWho{left:6px;}
+  .table .tableTitle{left:6px;}
+  .table .tableWho{left:6px;}
 }
-body.landscapeCompat .table:not(.cornerOn) .tableTitle{left:6px;}
-body.landscapeCompat .table:not(.cornerOn) .tableWho{left:6px;}
+body.landscapeCompat .table .tableTitle{left:6px;}
+body.landscapeCompat .table .tableWho{left:6px;}

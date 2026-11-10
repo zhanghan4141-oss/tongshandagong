@@ -667,7 +667,7 @@ function bindLobby(){
   // 刷新列表按钮（大厅右上角）：重新拉取房间列表（非整页刷新）
   const rl=$('btnRefreshList'); if(rl) rl.onclick=()=>{ if(socket){ socket.emit('listRooms'); toast('已刷新房间列表'); } };
   // 设置变更 → 发服务器（开局前生效）
-  ['setRounds','setKings','setJoker','setHalfFan','setFanCap','setTailBonus','setShowRemain','setShowCorner','setShowLog','setAIFill','setAIAuto'].forEach(id=>{
+  ['setRounds','setKings','setJoker','setHalfFan','setFanCap','setTailBonus','setShowRemain','setShowLog','setAIFill','setAIAuto'].forEach(id=>{
     const el=$(id);
     if(el) el.onchange=()=>{ if(socket) socket.emit('setSettings', collectSettings()); };
   });
@@ -709,7 +709,6 @@ function collectSettings(){
     fanCap: Number($('setFanCap')?.value ?? 32),
     tailBonus: !!$('setTailBonus')?.checked,
     showRemain: !!$('setShowRemain')?.checked,
-    showCorner: !!$('setShowCorner')?.checked,
     showLog: !!$('setShowLog')?.checked,
   };
   if($('setAIFill')) s.aiFill=!!$('setAIFill').checked;
@@ -725,7 +724,6 @@ function applySettings(s){
   if($('setFanCap')) $('setFanCap').value=String(s.fanCap ?? 32);
   if($('setTailBonus')) $('setTailBonus').checked=!!s.tailBonus;
   if($('setShowRemain')) $('setShowRemain').checked=!!s.showRemain;
-  if($('setShowCorner')) $('setShowCorner').checked = s.showCorner === true;
   if($('setShowLog')) $('setShowLog').checked = s.showLog === true;
   if($('setAIFill')) $('setAIFill').checked=!!s.aiFill;
   if($('setAIAuto')) $('setAIAuto').checked=!!s.aiAuto; // 漏同步：换房主/重进后勾选应跟服务器一致

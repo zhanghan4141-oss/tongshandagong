@@ -74,7 +74,7 @@ function T(name, cond, extra){
 
   const mkSnap = () => ({
     code:'P', aiFill:true, ready:[true,true,false,true],
-    settings:{ rounds:3, kings:8, jokerValue:3, fanCap:32, halfFan:1, showRemain:false, showCorner:false, showLog:false, aiFill:true },
+    settings:{ rounds:3, kings:8, jokerValue:3, fanCap:32, halfFan:1, showRemain:false, showLog:false, aiFill:true },
     series:{ active:true, roundCount:1, totals:[12,-3,7,-9], lastRound:null },
     hostSeat:0, seriesOver:false, endVote:null,
     seats:[0,1,2,3].map(i => ({ name:['甲','乙','丙','丁'][i], type:'human', offline:false, avatar:'', humanCount:4 })),

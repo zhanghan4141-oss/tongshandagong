@@ -11,6 +11,7 @@ Node.js 服务器权威：发牌、规则判定、结算、AI 托管全部在服
 ## 功能概览
 
 - **房间制对战**：4 位房间号，可随机生成或自选；大厅实时房间列表；房主可删除房间。
+- **牌局信息栏与房间列表**：开场前/局末清空后在标题右侧显示当前设置（局数/王总数/王单出/半边/笼数封顶/未跑奖金）；大厅房间列表逐间显示玩家昵称与掉线状态。
 - **真人 1–4 人 + AI 补位**：不足 4 人时房主可开启 AI 补位立即开局；全员准备后自动开始。
 - **断线重连**：凭房间号 + 昵称回座；对局中掉线保留座位等待重连，未开局掉线超时自动移出。
 - **一场多局**：默认 4 局，可设 1/4/8/12/16 局；每局结束累计比分，最后一局后重置准备状态。
@@ -171,7 +172,7 @@ tongshandagong/
 
 - **王奖金**：起手 ≥4 王，每多 1 王向其他三家各收 1 番（4 王=1 番/家）。
 - **硬炸奖**：起手 7 张纯牌同点 → 其他三家各 1 番；8 张及以上 → 各 2 番；多门可累加。
-- 开启「尾游也可拿王奖金」后，王奖金四游同样生效；硬炸奖暂无此开关。
+- 开启「未跑也可拿王奖金」后，王奖金四游同样生效；硬炸奖暂无此开关。
 
 ### 牌局设置（仅房主，可在一局结束后调整）
 
@@ -182,9 +183,8 @@ tongshandagong/
 | 王单出 | 算 3 / 算 2 | 3 |
 | 半番分值 | 1–50 | 1 |
 | 番数封顶 | 32 / 64 / 128 / 不封顶 | 32 |
-| 尾游拿王奖金 | 开 / 关 | 关 |
+| 未跑拿王奖金 | 开 / 关 | 关 |
 | 显示剩余张数 | 开 / 关 | 关 |
-| 显示牌局信息框 | 开 / 关 | 关 |
 | 显示出牌记录框 | 开 / 关 | 关 |
 | AI 补位 | 开 / 关 | 关 |
 
@@ -283,7 +283,7 @@ node tools/build-apk.js --server http://8.148.29.231
 # 或 npm run apk -- --server http://8.148.29.231
 ```
 
-脚本会临时把地址写进 `public/js/env.js`、按 http/https 调整 Capacitor 配置，构建完自动还原仓库文件；产物在 `dist/tongshandagong-<版本>-<host>-debug.apk`（文件名带版本号）。
+脚本会临时把地址写进 `public/js/env.js`、按 http/https 调整 Capacitor 配置，构建完自动还原仓库文件；产物在 `dist/tongshandagong-<版本>-<host>-{release|debug}.apk`（文件名带版本号；检测到 `android/release.keystore` 时出 release 包，否则 debug）。
 
 用 IP 走 http 时，服务端需要额外放行一个端口（见 `deploy/nginx-www.zhangyuning.xyz.conf` 里的「IP 直连」server 块），否则 80 端口只会 301 跳到证书不匹配的 https。
 
@@ -300,24 +300,37 @@ node tools/build-apk.js --server http://8.148.29.231
 
 ### 发布
 
-- 调试包（debug）可直接安装，用于内测分发
-- 正式包需要在 `android/app/build.gradle` 配置 signingConfig，keystore 文件不入库（`.gitignore` 已忽略 `*.jks` / `*.keystore`），**务必备份**
+- 调试包（debug）可直接安装，用于内测分发；正式包用 release keystore 签名（别名 `tongshandagong`，密码走环境变量 `RELEASE_KEYSTORE_PASSWORD`）。
+- keystore 文件不入库（`.gitignore` 已忽略 `*.jks` / `*.keystore`）；CI 用 GitHub Secrets（`RELEASE_KEYSTORE_B64`=base64 内容、`RELEASE_KEYSTORE_PASSWORD`=密码）注入后 `assembleRelease`。**本机 keystore 务必另行备份**。
 - 包名 `xyz.zhangyuning.dagong` 一旦上架不可更改
 
 ### App 应用内更新（方案1：提示 + 下载）
 
 App 每次启动向 `GET /api/app/update` 检查版本，若服务器上有更新版本则弹窗「发现新版本 vX.Y.Z」。点「立即下载」后在 **App 内下载**（弹窗显示进度），完成后自动拉起系统安装器；首次安装需允许「安装未知应用」，之后仍需在系统安装页点「安装」（Android 不允许普通应用静默安装）。下载或拉起安装器失败时自动回退为浏览器下载。服务端无更新时静默跳过。
 
-**发布一条新版本**（默认：APK 入仓，服务器 pull 后自动同步）：
+**发布一条新版本**（两种方式）：
+
+**方式一（推荐，当前主用）：GitHub Actions 打 tag 构建**
+
+```sh
+# 1. bump android/app/build.gradle 的 versionCode+1、versionName 递增并提交
+# 2. 打 tag（tag 注释即本次更新说明），并 push tag
+git tag -a v1.0.17 -m "本次更新：…"
+git push origin v1.0.17
+```
+
+push tag 后 CI（`.github/workflows/release-apk.yml`）自动：用 release keystore 构建 `assembleRelease` → 发布 GitHub Release 资产（兜底）→ 提交 `release/latest.apk` 入仓（主分发）→ 写 `app-update/manifest.json` 并提交回 `main`。随后服务器 `redeploy.sh` 的 `git pull` 检测到 APK 变化即同步到 `app-update/`。前置：仓库需配 `RELEASE_KEYSTORE_B64`、`RELEASE_KEYSTORE_PASSWORD` 两个 Secrets。
+
+**方式二（本地无 CI 时）：本地脚本**
 
 ```sh
 node tools/release-apk.js --note "更新说明，支持多行"
 # 可选：--version 1.2.0 指定版本号（默认 patch +1）
 ```
 
-该命令会：bump `versionCode+1` / `versionName`（写回 `android/app/build.gradle`）→ 构建 production APK → 写入 `release/latest.apk` → 写入 `app-update/manifest.json`。之后提交 `build.gradle`、`release/latest.apk`、`manifest.json` 并 push；服务器 `redeploy.sh` 的 `git pull` 会检测 APK 是否有变化，有则复制到 `app-update/tongshandagong-<版本>.apk`（用户下载时文件名带版本，同时更新 `latest.apk` 兼容旧地址）。
+该命令会：bump `versionCode+1` / `versionName`（写回 `android/app/build.gradle`）→ 构建 APK（检测到 `android/release.keystore` 时出 release 包，否则 debug）→ 写入 `release/latest.apk` → 写入 `app-update/manifest.json`。之后提交 `build.gradle`、`release/latest.apk`、`manifest.json` 并 push；服务器 `redeploy.sh` 的 `git pull` 会检测 APK 是否有变化，有则复制到 `app-update/tongshandagong-<版本>.apk`（用户下载时文件名带版本，同时更新 `latest.apk` 兼容旧地址）。
 
-**其它分发方式**（可选）：
+**本地脚本的其它分发方式**（可选）：
 - `--release`：上传 GitHub Release（需 `GH_TOKEN`），manifest 的 `fallbackUrl` 指向 Release
 - `--scp`：直接 scp 到服务器（需 `APP_DEPLOY_SSH=user@host`，可选 `APP_DEPLOY_PORT` / `APP_DEPLOY_KEY`）
 - 两者可同时使用（服务器为主、Release 兜底）
@@ -350,6 +363,12 @@ node tools/release-apk.js --note "更新说明，支持多行"
 | `node tests/ready-offline-check.js` | 开局前有人掉线 → 不清开局、重连后恢复 e2e | 否（自动起服务） |
 | `node tests/host-check.js` | 房主机制（hostSeat/删房）e2e | 否（自动起服务） |
 | `node tests/exit-check.js` | 局末退出口径 / join 只进空位（不顶掉线座）/ start 收权 e2e | 否（自动起服务） |
+| `node tests/frozenseat-check.js` | 场末冻结房空位座/新玩家入座的残局数据清空 e2e | 否（自动起服务） |
+| `node tests/takeover-check.js` | 座位顶替（重连接管：同意/拒绝/超时/冷静期）e2e | 否（自动起服务） |
+| `node tests/room-admin-check.js` | 房管回归：踢出 / 历史分数 / 空房宽容 e2e | 否（自动起服务） |
+| `node tests/ui-clear-check.js` | 客户端「清理牌局」渲染回归（需 jsdom，不挂 npm test） | 否 |
+| `node tests/ui-seat-check.js` | 座位行差量（seatSig）陈旧回归（需 jsdom，独立运行） | 否 |
+| `node tests/ai-bench.js` | AI 自对弈基准（HEAD vs 工作区，`npm run bench:ai`） | 否 |
 | `node tests/net-sim.js` | 1 真人 + 3 AI 自动打完整局（联调脚本，需先起 8080 服务） | 是 |
 | `node tests/cdp-mobile-check.js` | 移动端布局裁剪检查（需调试端口 9224 的 Chrome） | 是 |
 | `node tests/wx-auth.js` | 微信授权（WX_MOCK）流程、Cookie 签名、Socket 身份覆盖 | 否（自起测试服务） |

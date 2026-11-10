@@ -12,7 +12,7 @@
  *
  * 做了什么：
  *   1. android/app/build.gradle 的 versionCode+1、versionName 递增（可 --version 覆盖）
- *   2. 调 tools/build-apk.js 构建 production APK
+ *   2. 调 tools/build-apk.js 构建 APK（检测到 release.keystore 时出 release 包，否则 debug）
  *   3. 按上述方式分发 APK
  *   4. 写 app-update/manifest.json：
  *        入仓/服务器有 APK → apkUrl=/app-update/tongshandagong-<版本>.apk（同域，下载文件名带版本），有 Release 时兜底
@@ -26,7 +26,11 @@ const { spawnSync } = require('child_process');
 
 const root = path.resolve(__dirname, '..');
 const gradlePath = path.join(root, 'android', 'app', 'build.gradle');
-const apkSrc = path.join(root, 'android', 'app', 'build', 'outputs', 'apk', 'debug', 'app-debug.apk');
+// 发布签名：与 CI 一致——检测到 android/release.keystore 时出 release 包，否则退回 debug（本地无密钥兜底）
+const ksExists = fs.existsSync(path.join(root, 'android', 'release.keystore'));
+const apkSrc = ksExists
+  ? path.join(root, 'android', 'app', 'build', 'outputs', 'apk', 'release', 'app-release.apk')
+  : path.join(root, 'android', 'app', 'build', 'outputs', 'apk', 'debug', 'app-debug.apk');
 const updDir = path.join(root, 'app-update');
 const repoApkDir = path.join(root, 'release');
 const repoApkPath = path.join(repoApkDir, 'latest.apk');
@@ -234,12 +238,12 @@ async function publishRelease(){
   if(repoOk){
     console.log('  1. 提交 build.gradle、release/latest.apk、app-update/manifest.json，push');
     console.log('  2. 服务器 redeploy 的 git pull 会检测到 APK 变化并同步到 app-update/' + localApkName);
-    console.log('  3. 本机体验：装 dist/tongshandagong-' + versionName + '-production-debug.apk');
+    console.log('  3. 本机体验：装 dist/tongshandagong-' + versionName + '-production' + (ksExists ? '-release.apk' : '-debug.apk'));
   } else {
     console.log('  1. 提交 build.gradle 版本号与 app-update/manifest.json，push 后部署服务器');
     console.log('  2. ' + (serverOk
       ? '服务器上 ' + localApkName + ' 已由本次上传就位；/api/app/update 读取仓库里的 manifest'
       : '服务器未上传，客户端走 Release 地址；/api/app/update 读取仓库里的 manifest'));
-    console.log('  3. 本机体验：装 dist/tongshandagong-' + versionName + '-production-debug.apk');
+    console.log('  3. 本机体验：装 dist/tongshandagong-' + versionName + '-production' + (ksExists ? '-release.apk' : '-debug.apk'));
   }
 })();

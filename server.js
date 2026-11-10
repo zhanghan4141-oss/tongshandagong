@@ -501,7 +501,6 @@ function createRoom(code){
     settings: {         // 牌局设置（房主可调）
       rounds: 4,        // 一轮打多少局（默认 4；界面可选 1/4/8/12/16）
       showRemain: false, // 是否显示剩余张数（默认关，关闭时显示固定"10张"）
-      showCorner: false, // 是否显示牌桌信息框（叫牌/局数/半番等），默认不显示
       showLog: false,    // 是否显示出牌记录框（右上角日志），默认不显示
       aiAuto: false,     // 是否允许玩家开启「AI出牌」代打按钮（默认关）
       kings: 8,         // 王总数 8/10/12
@@ -542,7 +541,6 @@ function applySettings(r, data){
   const s = r.settings;
   if(data.rounds!=null){ const n=Number(data.rounds); if(n>=1&&n<=20) s.rounds=Math.floor(n); }
   if(data.showRemain!=null) s.showRemain=!!data.showRemain;
-  if(data.showCorner!=null) s.showCorner=!!data.showCorner;
   if(data.showLog!=null) s.showLog=!!data.showLog;
   if(data.kings!=null) s.kings=[8,10,12].includes(Number(data.kings))?Number(data.kings):8;
   if(data.jokerValue!=null) s.jokerValue=Number(data.jokerValue)===2?2:3;
@@ -556,7 +554,7 @@ function applySettings(r, data){
 function resetRoomSettings(room){
   if(!room) return;
   room.settings = {
-    rounds: 4, showRemain: false, showCorner: false, showLog: false,
+    rounds: 4, showRemain: false, showLog: false,
     aiAuto: false, kings: 8, jokerValue: 3, tailBonus: false, fanCap: 32, halfFan: 1,
   };
   room.aiFill = false;
@@ -573,7 +571,6 @@ function settingChanges(old, room){
   if(old.fanCap !== s.fanCap) ch.push(`笼数封顶 ${s.fanCap===0?'不封顶':s.fanCap}`);
   if(old.tailBonus !== s.tailBonus) ch.push(`未跑可拿王奖金 ${on(s.tailBonus)}`);
   if(old.showRemain !== s.showRemain) ch.push(`显示剩余张数 ${on(s.showRemain)}`);
-  if(old.showCorner !== s.showCorner) ch.push(`牌局信息框 ${on(s.showCorner)}`);
   if(old.showLog !== s.showLog) ch.push(`出牌记录 ${on(s.showLog)}`);
   if(old.aiFill !== room.aiFill) ch.push(`AI补位 ${on(room.aiFill)}`);
   if(old.aiAuto !== s.aiAuto) ch.push(`AI代打 ${on(s.aiAuto)}`);
@@ -1338,7 +1335,7 @@ io.on('connection', (socket)=>{
     const old = {
       rounds: room.settings.rounds, kings: room.settings.kings, jokerValue: room.settings.jokerValue,
       halfFan: room.settings.halfFan, fanCap: room.settings.fanCap, tailBonus: room.settings.tailBonus,
-      showRemain: room.settings.showRemain, showCorner: room.settings.showCorner, showLog: room.settings.showLog,
+      showRemain: room.settings.showRemain, showLog: room.settings.showLog,
       aiFill: room.aiFill, aiAuto: room.settings.aiAuto,
     };
     // 逐键白名单（与 create 共用 applySettings）；wantStart 在下方单独处理
