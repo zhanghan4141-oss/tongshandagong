@@ -397,7 +397,7 @@ input,textarea{-webkit-user-select:text;user-select:text;}
 
 [hidden]{display:none!important;}
 /* ===== 大厅 ===== */
-#lobby{display:flex;min-height:100vh;align-items:center;justify-content:center;}
+#lobby{display:flex;min-height:100vh;align-items:flex-start;justify-content:center;padding-top:10vh;box-sizing:border-box;}
 .lobbyBox{position:relative;background:#173e2e;border:1px solid var(--gold);border-radius:16px;padding:26px 30px;max-width:460px;width:92%;}
 /* 大厅右上角：下载 App 安装包（仅在网页端出现） */
 .lobbyDownload{position:absolute;right:12px;top:12px;font-size:12px;padding:4px 10px;}
