@@ -451,10 +451,21 @@ function renderRoomList(list){
       r.started ? '对局中' : '',
       offline > 0 ? `<span class="roomOffline">${offline}人掉线</span>` : '',
     ].filter(Boolean).join(' · ');
-    // 房间信息：房号(左) · 状态/掉线(中) · 人数(最右)
-    item.innerHTML = `<span class="roomCodeLbl">${esc(r.code)}</span>`
+    // 房间信息：第一行 房号·状态/掉线·人数；第二行 4 个座位昵称（掉线灰+⚠️，房主加标，昵称截断）
+    const shortName=(n)=>{ n=String(n||''); return n.length>4 ? n.slice(0,4)+'…' : n; };
+    const seatsHtml=(r.seats||[]).map(s=>{
+      if(!s.human) return `<span class="seatChip empty">${r.aiFill?'AI':'空位'}</span>`;
+      const nm=esc(shortName(s.name));
+      const off=s.offline?' ⚠️':'';
+      const host=s.host?' <i class="hostTag">房主</i>':'';
+      return `<span class="seatChip${s.offline?' off':''}">${nm}${off}${host}</span>`;
+    }).join('');
+    item.innerHTML = `<div class="roomHead">`
+      + `<span class="roomCodeLbl">${esc(r.code)}</span>`
       + `<span class="roomMeta">${meta}</span>`
-      + `<span class="roomHumans">${r.humans}/4人</span>`;
+      + `<span class="roomHumans">${r.humans}/4人</span>`
+      + `</div>`
+      + `<div class="roomSeats">${seatsHtml}</div>`;
     // 进入：未开局缺人 → join；自己的房间 → rejoin 归位
     if(canJoin || isMineHost){
       item.title='点击进入';

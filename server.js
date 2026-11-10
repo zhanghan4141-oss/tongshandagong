@@ -1291,6 +1291,12 @@ io.on('connection', (socket)=>{
         hasGame: !!r.G,   // 房间已创建对局（含确认轮），供重连列表判断
         rounds:r.settings.rounds,
         host: (r.seats[hs] && r.seats[hs].type==='human') ? r.seats[hs].name : null,
+        seats: r.seats.map((s,i)=>({ // 大厅列表：每个座位的昵称/是否真人/是否掉线/是否房主
+          name: s.type==='human' ? s.name : '',
+          human: s.type==='human',
+          offline: !!(s.type==='human' && s.offline),
+          host: !!(s.type==='human' && i===hs),
+        })),
       });
     });
     socket.emit('rooms', list);

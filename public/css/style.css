@@ -574,13 +574,20 @@ html.isApp .lobbyDownload{position:static;display:block;width:max-content;margin
 .roomListWrap .rlTitle{font-size:14px;color:var(--gold);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .roomListWrap .rlTitle .btn{padding:2px 10px;font-size:12px;}
 #roomList{max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
-/* 房间信息一行：房号(左) · 状态/掉线(中) · 人数(最右) */
-.roomItem{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:10px 14px;font-size:15px;color:#eef3ea;cursor:default;}
+/* 房间信息两行：第一行 房号/状态掉线/人数；第二行 4 个座位昵称 */
+.roomItem{display:flex;flex-direction:column;align-items:stretch;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:10px 14px;font-size:15px;color:#eef3ea;cursor:default;}
+.roomHead{display:flex;align-items:center;gap:8px;}
 .roomItem:hover{background:rgba(255,255,255,.1);}
 .roomItem.roomFull{opacity:.5;cursor:not-allowed;}
 .roomItem .roomMeta{color:#a8c8b8;font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .roomItem .roomMeta .roomOffline{color:#f0a35e;}
 .roomItem .roomHumans{margin-left:auto;color:#a8c8b8;font-size:13px;white-space:nowrap;}
+/* 房间内座位昵称行：在线/掉线/空位/AI/房主 */
+.roomSeats{display:flex;flex-wrap:wrap;gap:6px;}
+.seatChip{display:inline-flex;align-items:center;gap:3px;max-width:104px;padding:1px 7px;border-radius:5px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);font-size:12px;color:#eef3ea;white-space:nowrap;overflow:hidden;}
+.seatChip.off{color:#9db8aa;opacity:.55;border-color:rgba(255,255,255,.1);}
+.seatChip.empty{color:#7a9388;background:transparent;border-style:dashed;}
+.seatChip .hostTag{font-style:normal;color:var(--gold);font-size:10px;}
 /* 加入/重连弹窗：房间可点选列表 */
 .narrowBox{max-width:360px !important;}
 .pickBox{max-height:170px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:8px;background:rgba(255,255,255,.04);margin-bottom:10px;}
