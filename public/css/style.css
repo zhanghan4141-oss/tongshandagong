@@ -183,10 +183,9 @@ input,textarea{-webkit-user-select:text;user-select:text;}
 #trickScore{position:relative;top:6px;font-size:15px;color:#d9e8e0;}
 #trickScore .scoreNum{color:#ffd24a;font-weight:bold;}
 
-/* ===== 牌桌左上角：叫牌 + 明鸡状态 ===== */
-/* 默认隐藏：只有 renderCorner() 明确开启（对局配置里勾选显示信息框）时才出现，
-   否则空盒子会在进房未开局时露出一块“占位” */
-.corner{position:absolute;top:10px;left:12px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:6px 10px;font-size:12px;color:#e5f0e9;display:none;flex-direction:column;gap:3px;min-width:120px;}
+/* ===== 牌桌左上角（标题右侧）：当前牌局设置（开场前显示） ===== */
+/* 默认隐藏：renderCorner() 在「未开局 / 局末场末点过准备、牌桌已清空」时显示 */
+.corner{position:absolute;top:10px;left:130px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:5px 9px;font-size:11px;color:#e5f0e9;display:none;flex-direction:column;gap:3px;min-width:120px;}
 .corner .cornerRow{display:flex;align-items:center;gap:6px;line-height:1.4;}
 .corner .mini{width:30px;height:42px;border-radius:4px;}
 .corner .mini .tl{font-size:10px;} .corner .mini .br{font-size:10px;} .corner .mini .ctr{font-size:12px;}
@@ -603,7 +602,7 @@ input,textarea{-webkit-user-select:text;user-select:text;}
 /* 标题 + 房间号 + 人数（同行）；竖排：通山打拱+提示 / 房间号 / 我是谁 */
 .tableTitle{display:flex;flex-direction:column;align-items:flex-start;gap:3px;white-space:nowrap;}
 .tableTitle .titleTop{display:flex;align-items:center;gap:10px;}
-.tableTitle .tTitle{color:#fff;font-size:23px;letter-spacing:2px;font-weight:bold;text-shadow:0 1px 2px rgba(0,0,0,.5);}
+.tableTitle .tTitle{color:#fff;font-size:25px;letter-spacing:2px;font-weight:bold;text-shadow:0 1px 2px rgba(0,0,0,.5);}
 .tableTitle .chip{font-size:11px;padding:2px 8px;background:rgba(0,0,0,.4);}
 /* 房间号右侧：牌桌中间两行提示的副本（去掉“轮到谁/谁压着”），字号比中间大。
    两行竖排在房间号右下方，宽度控制在北家信息框（居中）左边的空白区内。 */

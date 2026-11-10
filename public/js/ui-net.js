@@ -861,6 +861,7 @@ function applyState(snap){
     boardCleared=false;
     renderWaitingView(); // 空桌态：顶部条/按钮/出牌排/圆点全按「刚进房」（公共出口，见函数定义）
     renderKickButtons();
+    renderCorner(); // 未开局：显示当前牌局设置
     return;
   }
   // 刚点过【准备】/【下一局】（本局已结束、G 仍冻结等全员就绪）：显示同「刚进房」的空桌态。
@@ -872,6 +873,7 @@ function applyState(snap){
     renderSeatNames();
     renderWaitingView();
     renderKickButtons();
+    renderCorner(); // 局末/场末点过准备、牌桌已清空：显示当前牌局设置
     return;
   }
   // 有自己手牌才显示排序/牌大小（出完牌/局末空手牌时隐藏）
@@ -1410,24 +1412,21 @@ function renderSeats(){
 }
 function renderCorner(){
   const c=$('corner'); if(!c) return;
-  // 房主可在「对局配置」里开启该信息框（默认不显示）；显示当前牌局设置
-  const show=settings.showCorner === true;
+  // 只在「未开局 / 局末场末点过准备、牌桌已清空」时显示；不受 showCorner 开关控制
+  const show = !G || (G && G.ended && boardCleared);
   c.style.display = show ? 'flex' : 'none';
-  // 同步给牌桌：信息框隐藏时，标题/房间号/我是谁 靠左，不占用信息框的位置
-  const table=c.closest ? c.closest('.table') : document.querySelector('.table');
-  if(table) table.classList.toggle('cornerOn', show);
   // #26 仅当设置内容变化时才重建 DOM（避免每次广播都刷信息框）
   const sk=JSON.stringify(settings);
   if(renderCornerKey!==sk){
     renderCornerKey=sk;
     c.innerHTML='';
-    const mkChip=(label,val)=>`<div class="cornerRow"><span style="color:#a8c8b8">${label}</span><b>${val||'—'}</b></div>`;
+    const mkChip=(label,val)=>`<div class="cornerRow"><span style="color:#a8c8b8">${label}：</span><b>${val||'—'}</b></div>`;
     c.innerHTML += mkChip('局数', `${settings.rounds||1} 局`);
     c.innerHTML += mkChip('王总数', `${settings.kings||8} 个`);
     c.innerHTML += mkChip('王单出', settings.jokerValue===2 ? '算 2' : '算 3');
     c.innerHTML += mkChip('半边', `${settings.halfFan||1} 分`);
     c.innerHTML += mkChip('笼数封顶', settings.fanCap ? `${settings.fanCap} 笼` : '不封顶');
-    c.innerHTML += mkChip('未跑奖', settings.tailBonus ? '可拿王奖' : '不拿');
+    c.innerHTML += mkChip('未跑奖金', settings.tailBonus ? '可拿王奖' : '不拿');
   }
 }
 function cardHTML(c,cls){
