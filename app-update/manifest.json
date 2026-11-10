@@ -1,8 +1,8 @@
 {
-  "version": "1.0.14",
-  "note": "本次更新：App 启动时自动清理缓存里残留的旧安装包",
-  "apkUrl": "/app-update/tongshandagong-1.0.14.apk",
-  "fallbackUrl": "https://github.com/zhanghan4141-oss/tongshandagong/releases/download/v1.0.14/tongshandagong-1.0.14.apk",
-  "apkSize": 4976950,
-  "publishedAt": "2026-11-10T08:50:38.673Z"
+  "version": "1.0.15",
+  "note": "本次更新：大厅房间列表显示每个房间的玩家昵称与掉线状态",
+  "apkUrl": "/app-update/tongshandagong-1.0.15.apk",
+  "fallbackUrl": "https://github.com/zhanghan4141-oss/tongshandagong/releases/download/v1.0.15/tongshandagong-1.0.15.apk",
+  "apkSize": 4977400,
+  "publishedAt": "2026-11-10T10:24:54.297Z"
 }
