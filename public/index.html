@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>通山打拱 · 多人联网</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E🀄%3C/text%3E%3C/svg%3E">
-<link rel="stylesheet" href="css/style.css?v=296">
+<link rel="stylesheet" href="css/style.css?v=297">
 </head>
 <body>
 <div id="app">
@@ -13,8 +13,6 @@
   <!-- ===== 大厅（进入前） ===== -->
   <div id="lobby">
     <div class="lobbyBox">
-      <!-- 大厅右上角：网页端「下载 App」；原生 App 内「检查更新」（地址取 /api/app/update） -->
-      <button id="btnDownloadApp" class="btn small lobbyDownload" hidden>下载 App</button>
       <h1>通山打拱·拱神杨子版</h1>
       <p class="lobbySub" id="lobbyTip">使用微信头像和昵称加入房间</p>
       <!-- 微信授权后的身份 -->
@@ -47,6 +45,8 @@
         <div id="roomList">（连接服务器中…）</div>
       </div>
       <div id="status"></div>
+      <!-- 网页端「下载 App」（右上角绝对定位）；原生 App 内「检查更新」（底部右下、含版本号） -->
+      <button id="btnDownloadApp" class="btn small lobbyDownload" hidden>下载 App</button>
     </div>
   </div>
 
