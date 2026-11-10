@@ -1,8 +1,8 @@
 {
-  "version": "1.0.9",
-  "note": "更新至 v1.0.9",
-  "apkUrl": "/app-update/tongshandagong-1.0.9.apk",
-  "fallbackUrl": "https://github.com/zhanghan4141-oss/tongshandagong/releases/download/v1.0.9/tongshandagong-1.0.9.apk",
-  "apkSize": 5984643,
-  "publishedAt": "2026-11-10T04:29:41.909Z"
+  "version": "1.0.10",
+  "note": "更新至 v1.0.10",
+  "apkUrl": "/app-update/tongshandagong-1.0.10.apk",
+  "fallbackUrl": "https://github.com/zhanghan4141-oss/tongshandagong/releases/download/v1.0.10/tongshandagong-1.0.10.apk",
+  "apkSize": 4976396,
+  "publishedAt": "2026-11-10T07:04:18.379Z"
 }
