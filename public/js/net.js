@@ -520,9 +520,23 @@ function renderRejoinPick(){
     box.appendChild(d);
   });
 }
-// 大厅右上角：网页端显示「下载 App」（有发布包时）；原生 App 内显示「检查更新」
+// 是否 iOS（含 iPadOS 13+ 伪装成 Macintosh UA 的 iPad：UA 带 Macintosh 且有触屏）
+function isIOS(){
+  const ua = navigator.userAgent || '';
+  if(/iPad|iPhone|iPod/.test(ua)) return true;
+  const isMac = /Macintosh/.test(ua) && !/Windows|Android|Linux/.test(ua);
+  return isMac && navigator.maxTouchPoints > 1;
+}
+// 是否已以 PWA 独立窗口运行（iOS 用 navigator.standalone，通用用 display-mode）
+function isStandalone(){
+  if(window.navigator.standalone === true) return true;
+  try{ if(window.matchMedia('(display-mode: standalone)').matches) return true; }catch(e){}
+  return false;
+}
+// 大厅右上角：原生 App 内显示「检查更新」；网页端按平台区分「下载 App（APK）/ 添加到主屏幕（iOS）」
 function initDownloadApp(){
   const b=$('btnDownloadApp'); if(!b) return;
+  const g=$('btnPwaGuideClose'); if(g) g.onclick=()=>{ const m=$('pwaGuideModal'); if(m) m.hidden=true; };
   if(IS_APP){
     b.textContent='检查更新';
     b.onclick=()=>{
@@ -544,6 +558,26 @@ function initDownloadApp(){
     }catch(e){}
     return;
   }
+  // 已以 PWA 独立窗口运行：无需再引导，保持隐藏
+  if(isStandalone()) return;
+  // iOS：装不了 APK，改为引导「添加到主屏幕」
+  if(isIOS()){
+    b.textContent='添加到主屏幕';
+    b.onclick=()=>{ const m=$('pwaGuideModal'); if(m) m.hidden=false; };
+    b.hidden=false;
+    return;
+  }
+  // Android/桌面：维持下载 APK（有发布包时才显示）；Chrome 支持时另提供「安装网页版」（PWA）
+  const pb = $('btnPwaInstall');
+  if(pb) pb.onclick = async ()=>{
+    if(!deferredInstallPrompt){ pb.hidden = true; return; }
+    const ev = deferredInstallPrompt;
+    deferredInstallPrompt = null;
+    ev.prompt();
+    try{ await ev.userChoice; }catch(e){}
+    updatePwaInstallButton(); // 接受后浏览器还会派发 appinstalled，由其隐藏「下载 App」
+  };
+  updatePwaInstallButton();
   fetch(apiUrl('/api/app/update'), { cache:'no-store' })
     .then(r=>r.json())
     .then(d=>{
@@ -727,6 +761,30 @@ function applySettings(s){
   if($('setShowLog')) $('setShowLog').checked = s.showLog === true;
   if($('setAIFill')) $('setAIFill').checked=!!s.aiFill;
   if($('setAIAuto')) $('setAIAuto').checked=!!s.aiAuto; // 漏同步：换房主/重进后勾选应跟服务器一致
+}
+
+// ---- PWA 安装提示：Android/桌面 Chrome 会派发 beforeinstallprompt（iOS 不支持此事件，走「添加到主屏幕」引导）----
+let deferredInstallPrompt = null;
+function updatePwaInstallButton(){
+  const b = $('btnPwaInstall'); if(!b) return;
+  b.hidden = !(!IS_APP && !isStandalone() && !!deferredInstallPrompt);
+}
+if(!IS_APP){
+  window.addEventListener('beforeinstallprompt', (e)=>{
+    e.preventDefault(); // 压掉浏览器默认迷你信息条，改用「安装网页版」按钮
+    deferredInstallPrompt = e;
+    updatePwaInstallButton();
+  });
+  window.addEventListener('appinstalled', ()=>{
+    deferredInstallPrompt = null;
+    updatePwaInstallButton();
+    const d = $('btnDownloadApp'); if(d) d.hidden = true; // 已安装网页版，隐藏「下载 App」
+  });
+}
+
+// 注册 Service Worker（仅网页 + 安全上下文）：满足 Android PWA 可安装性；sw.js 不缓存任何资源
+if(!IS_APP && window.isSecureContext && 'serviceWorker' in navigator){
+  try{ navigator.serviceWorker.register('/sw.js').catch(function(){}); }catch(e){}
 }
 
 window.NET = { connect, act, nextRound, start, toggleAI, apiUrl, quick(){ if(socket) socket.emit('quick'); }, toggleReady(){ if(socket) socket.emit('toggleReady', {}); }, kickSeat(seat){ if(socket) socket.emit('kickSeat',{seat}); }, get roomCode(){return roomCode;} };

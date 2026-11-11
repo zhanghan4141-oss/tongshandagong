@@ -1,0 +1,15 @@
+{
+  "name": "通山打拱 · 拱神杨子版",
+  "short_name": "通山打拱",
+  "description": "湖北通山地方扑克 · 2V2 联网对战",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f3d2a",
+  "theme_color": "#0f3d2a",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
